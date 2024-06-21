@@ -15,27 +15,22 @@ Datasets - https://huggingface.co/datasets
 Также для запуска модели требуется установка cuda (для использования ресурсов GPU).
 Для этого в терминале Anaconda нужно ввести команду:
 
-```
-conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
-````
+```conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia```
 
 Чтобы запустить проект я советую создавать виртуальное окружение. 
 Для этого надо ввести в консоли две команды:
 
-```
-python -m venv .venv
-.venv\Scripts\activate
-````
+```python -m venv .venv```
+
+```.venv\Scripts\activate```
 
 После этого можно подгружать другие зависимости указанный в файле:
-```
-python install -r requirements.txt
-````
+
+```python install -r requirements.txt```
 
 Запуск скрипта:
-```
-python .\main.py
-````
+
+```python .\main.py```
 
 ## Источники
 https://myscale.com/blog/how-to-fine-tune-llm-from-huggingface/
