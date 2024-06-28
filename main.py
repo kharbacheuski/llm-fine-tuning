@@ -1,41 +1,89 @@
-import torch
-from torch import cuda, bfloat16
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-from peft import LoraConfig
+
+
+# When prompted, paste the HF access token you created earlier.
+from huggingface_hub import notebook_login
+notebook_login()
+
 from datasets import load_dataset
-from trl import SFTConfig, SFTTrainer
+import torch
+from transformers import AutoModelForCausalLM, BitsAndBytesConfig, AutoTokenizer, TrainingArguments
+from peft import LoraConfig
+from trl import SFTTrainer
+import gc
+import os
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'garbage_collection_threshold:0.6,max_split_size_mb:512'
 
-modelID = "tiiuae/falcon-7b"
-dataset = load_dataset("timdettmers/openassistant-guanaco", split="train")
+def clear_gpu_memory():
+    torch.cuda.empty_cache()
+    gc.collect()
 
-if torch.cuda.is_available():
-    device = torch.device("cuda")
-    print("Using GPU:", torch.cuda.get_device_name(0))
-else:
-    device = torch.device("cpu")
-    print("CUDA is not available. Using CPU.")
- 
+clear_gpu_memory()
 
-quantizationConfig = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_compute_dtype=torch.float16,
+print(torch.cuda.mem_get_info())
+
+# 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
+
+dataset_name = "candenizkocak/llama3-finance-alpaca"
+dataset = load_dataset(dataset_name, split="train")
+
+base_model_name = "HPAI-BSC/Llama3-Aloe-8B-Alpha"
+
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=False,
     bnb_4bit_quant_type="nf4",
-    bnb_4bit_use_double_quant=True
+    bnb_4bit_compute_dtype=torch.float16,
 )
 
-model = AutoModelForCausalLM.from_pretrained(modelID, quantization_config=quantizationConfig)
+device_map = {"": 0}
 
-tokenizer = AutoTokenizer.from_pretrained(modelID)
-tokenizer.add_special_tokens({'pad_token': '<PAD>'})
+base_model = AutoModelForCausalLM.from_pretrained(
+    base_model_name,
+    quantization_config=bnb_config,
+    device_map=device_map,
+    trust_remote_code=True,
+    use_auth_token=True
+)
+base_model.config.use_cache = False
+
+# More info: https://github.com/huggingface/transformers/pull/24906
+base_model.config.pretraining_tp = 1 
+
+peft_config = LoraConfig(
+    lora_alpha=16,
+    lora_dropout=0.1,
+    r=64,
+    bias="none",
+    task_type="CAUSAL_LM",
+)
+
+tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
+tokenizer.pad_token = tokenizer.eos_token
+
+output_dir = "./results"
+
+training_args = TrainingArguments(
+    output_dir=output_dir,
+    per_device_train_batch_size=2,
+    gradient_accumulation_steps=4,
+    learning_rate=2e-5,
+    logging_steps=10,
+    max_steps=500
+)
+
+max_seq_length = 512
 
 trainer = SFTTrainer(
-    model=model,
+    model=base_model,
     train_dataset=dataset,
+    peft_config=peft_config,
     dataset_text_field="text",
-    max_seq_length=512,
+    max_seq_length=max_seq_length,
     tokenizer=tokenizer,
-    packing=True,
+    args=training_args,
 )
 
 trainer.train()
- 
+
+import os
+output_dir = os.path.join(output_dir, "final_checkpoint")
+trainer.model.save_pretrained(output_dir)

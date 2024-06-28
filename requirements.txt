@@ -1,6 +1,8 @@
 datasets
+peft
 git+https://github.com/huggingface/peft.git
 transformers
+git+https://github.com/huggingface/transformers.git
 trl
 torch
-bitsandbytes
+huggingface_hub
