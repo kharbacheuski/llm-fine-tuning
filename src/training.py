@@ -1,8 +1,7 @@
 
-
 # When prompted, paste the HF access token you created earlier.
-from huggingface_hub import notebook_login
-notebook_login()
+from huggingface_hub import login
+login()
 
 from datasets import load_dataset
 import torch
@@ -20,8 +19,6 @@ def clear_gpu_memory():
 clear_gpu_memory()
 
 print(torch.cuda.mem_get_info())
-
-# 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
 
 dataset_name = "candenizkocak/llama3-finance-alpaca"
 dataset = load_dataset(dataset_name, split="train")
@@ -41,7 +38,7 @@ base_model = AutoModelForCausalLM.from_pretrained(
     quantization_config=bnb_config,
     device_map=device_map,
     trust_remote_code=True,
-    use_auth_token=True
+    token=True
 )
 base_model.config.use_cache = False
 
@@ -64,10 +61,9 @@ output_dir = "./results"
 training_args = TrainingArguments(
     output_dir=output_dir,
     per_device_train_batch_size=2,
-    gradient_accumulation_steps=4,
-    learning_rate=2e-5,
+    learning_rate=2e-4,
     logging_steps=10,
-    max_steps=500
+    max_steps=100
 )
 
 max_seq_length = 512

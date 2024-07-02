@@ -8,31 +8,26 @@
 Models - https://huggingface.co/models
 Datasets - https://huggingface.co/datasets
 
+Для использования моделей с huggingface потребуется ввести token. Его можно найти/создать в личном кабинете на сайте 
+
+## Используемое оборудование
+Видеокарта: Nvidia GTX 1660 Ti
+Оперативная память: 32Гб
+
 ## Запуск
-Для пакета torch надо устанавлиать Anaconda (https://repo.anaconda.com/archive/Anaconda3-2024.06-1-Windows-x86_64.exe), и через нее запускать среду разработки (у меня получилось только так). 
-По другому python не видит этот пакет, хоть он и установлен.
+Я запускал данный скрипт на WSL Ubuntu 20.04
 
-Также для запуска модели требуется установка cuda (для использования ресурсов GPU).
-Для этого в терминале Anaconda нужно ввести команду:
+1) Установка основных пакетов. Torch для работы с CUDA (поставляется внутри пакета)
 
-```conda install pytorch torchvision torchaudio pytorch-cuda=12.2 -c pytorch -c nvidia```
+```pip3 install torch torchvision torchaudio```
 
-```pip3 install torch==1.10.1+cu113 torchvision==0.11.2+cu113 torchaudio===0.10.1+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html```
+2) Установка других зависимостей
 
-Чтобы запустить проект я советую создавать виртуальное окружение. 
-Для этого надо ввести в консоли две команды:
+```pip3 install -r requirements.txt```
 
-```python -m venv .venv```
+3) Запуск скрипта:
 
-```.venv\Scripts\activate```
-
-После этого можно подгружать другие зависимости указанный в файле:
-
-```pip install -r requirements.txt```
-
-Запуск скрипта:
-
-```python .\main.py```
+```python3 .\training.py```
 
 ## Источники
 https://myscale.com/blog/how-to-fine-tune-llm-from-huggingface/
