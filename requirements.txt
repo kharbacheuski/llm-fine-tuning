@@ -7,3 +7,4 @@ trl
 torch
 huggingface_hub
 bitsandbytes
+scikit-learn
