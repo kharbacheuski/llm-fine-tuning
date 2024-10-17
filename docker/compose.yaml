@@ -1,0 +1,10 @@
+services:
+  ollama:  # New service for running the Dockerfile in /ollama
+    image: ollama/ollama
+    # pull_policy: always
+    container_name: ollama
+    ports: ["11434:11434"] # will be accessible in http://localhost:11435
+    volumes:
+      - ./mount:/mount  # Mount the directory with the trained model
+    tty: true
+    entrypoint: ["/bin/sh", "./mount/run_ollama.sh"] # Loading the finetuned Mistral with the GGUF file

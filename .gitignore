@@ -2,3 +2,5 @@
 /checkpoints
 /results
 .env
+/models/*
+!models

@@ -1,0 +1,4 @@
+FROM qwen2.5
+
+ADAPTER "./qwen-0.5b-news.gguf"
+
