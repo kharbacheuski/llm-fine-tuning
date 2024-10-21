@@ -5,6 +5,12 @@ from peft import LoraConfig, get_peft_model
 from trl import SFTTrainer
 import torch
 
+models = [
+    "google/gemma-2-2b",
+    "Qwen/Qwen2.5-0.5B",
+    "Qwen/Qwen2.5-0.5B-Instruct",
+]
+
 # Шаг 1: Загрузка данных из CSV
 csv_file = "C:\\Users\\kiryl.harbacheuski\\Documents\\projects\\llm-fine-tuning\\datasets\\cnbc_headlines.csv"  # Укажите путь к вашему CSV
 df = pd.read_csv(csv_file)
@@ -16,7 +22,7 @@ df = df[['Headlines', 'Time', 'Description']]
 dataset = Dataset.from_pandas(df)
 
 # Шаг 2: Загрузка токенайзера и модели Qwen
-model_name = "Qwen/Qwen2.5-0.5B-Instruct"  # Название модели
+model_name = models[0]  # Название модели
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name)
 
@@ -27,9 +33,9 @@ print(f"Using device: {device}")
 
 # Шаг 3: Настройка PEFT (Lora)
 peft_config = LoraConfig(
-    r=16,  # Размер матриц LoRA
-    lora_alpha=32,
-    target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],  # Модули, к которым применяется LoRA
+    r=8,  # Размер матриц LoRA
+    lora_alpha=16,
+    target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "ffn_up", "ffn_down"],  # Модули, к которым применяется LoRA
     lora_dropout=0.1,
     bias="none"
 )
@@ -54,8 +60,8 @@ formatted_dataset = dataset.map(formatting_prompts_func, batched=True)
 # Шаг 5: Настройка Trainer и аргументов для обучения
 training_args = TrainingArguments(
     output_dir="./results",
-    per_device_train_batch_size=8,  # Указываем размер батча
-    gradient_accumulation_steps=8,
+    per_device_train_batch_size=4,  # Указываем размер батча
+    gradient_accumulation_steps=4,
     num_train_epochs=3,  # Количество эпох
     learning_rate=5e-5,
     logging_steps=10,
@@ -70,13 +76,15 @@ trainer = SFTTrainer(
     tokenizer=tokenizer,
     train_dataset=formatted_dataset,
     dataset_text_field="text",  # Поле для обучения
-    max_seq_length=512,  # Максимальная длина токенов
+    max_seq_length=256,  # Максимальная длина токенов
     args=training_args
 )
 
 # Шаг 7: Запуск обучения
 trainer.train()
 
+trained_model_save_path = f"../models/{model_name.split("/")[1]}-tuned"
+
 # Сохранение модели и токенайзера после дообучения
-model.save_pretrained("../models/qwen2-news")
-tokenizer.save_pretrained("../models/qwen2-news")
+model.save_pretrained(trained_model_save_path)
+tokenizer.save_pretrained(trained_model_save_path)

@@ -70,6 +70,19 @@ training_args = TrainingArguments(
 
 3) Запуск скрипта слияния ```/src/merge.py``` для получения полностью готовой модели с весами
 
+
+Чтобы открыть Bird-eye view visualization требуется выполнить в консоли некоторые команды:
+
+```bash
+# Установить jupyter notebook
+pip install notebook
+
+# Запустить notebook:
+jupyter notebook
+```
+
+После этого создать новый notebook в веб-интерфейсе, вставить в него код из файла ```/src/visualize.py``` и запустить.
+
 ## Источники
 
 https://myscale.com/blog/how-to-fine-tune-llm-from-huggingface/

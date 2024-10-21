@@ -2,7 +2,6 @@ from transformers import AutoTokenizer, AutoModelForQuestionAnswering
 import torch
 
 # Загрузка модели и токенайзера RoBERTa для задач вопросов-ответов
-data_model_path = "C:\\Users\\kiryl.harbacheuski\\Documents\\projects\\llm-fine-tuning\\roberta-base-squad2_model"
 model_name = "deepset/roberta-base-squad2"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForQuestionAnswering.from_pretrained(model_name)

@@ -4,3 +4,4 @@
 .env
 /models/*
 !models
+.ipynb_checkpoints
